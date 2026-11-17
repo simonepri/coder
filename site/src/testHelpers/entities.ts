@@ -5928,7 +5928,7 @@ export const MockOrganizationAISpendOverview: TypesGen.OrganizationAISpendOvervi
 		],
 	};
 
-const MockUnpricedAIModel: TypesGen.UnpricedAIModel = {
+export const MockUnpricedAIModel: TypesGen.UnpricedAIModel = {
 	provider_name: MockAIProviderAnthropic.name,
 	provider_display_name: MockAIProviderAnthropic.display_name,
 	provider_icon: MockAIProviderAnthropic.icon,
