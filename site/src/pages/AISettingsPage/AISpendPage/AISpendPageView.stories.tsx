@@ -27,6 +27,7 @@ const meta = {
 		overviewError: null,
 		unpricedModels: MockUnpricedAIModels.models,
 		isUnpricedModelsLoading: false,
+		canViewSessions: true,
 	},
 } satisfies Meta<typeof AISpendPageView>;
 
