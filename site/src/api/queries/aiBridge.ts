@@ -98,6 +98,20 @@ export const organizationAISpendOverview = (
 			API.experimental.getOrganizationAISpendOverview(organizationId, period),
 	});
 
+/**
+ * The models used in the period that still have no price. Only viewers who can
+ * read the organization's model prices get them; everyone else gets a 403.
+ */
+export const organizationUnpricedAIModels = (
+	organizationId: string,
+	period: AISpendPeriodWindow,
+) =>
+	queryOptions({
+		queryKey: ["organizations", organizationId, "unpricedAIModels", period],
+		queryFn: () =>
+			API.experimental.getOrganizationUnpricedAIModels(organizationId, period),
+	});
+
 export const infiniteSessionThreads = (sessionId: string) => {
 	return {
 		queryKey: ["aiBridgeSessionThreads", sessionId],

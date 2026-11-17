@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router";
 import {
 	aiSpendOrganizations,
 	organizationAISpendOverview,
+	organizationUnpricedAIModels,
 } from "#/api/queries/aiBridge";
 import { useAuthenticated } from "#/hooks/useAuthenticated";
 import { useDashboard } from "#/modules/dashboard/useDashboard";
@@ -73,6 +74,13 @@ const AISpendPage: React.FC<AISpendPageProps> = ({ now }) => {
 		enabled: isSpendAvailable && organization !== undefined,
 	});
 
+	// The unpriced models are slower to compute, so the total renders first and
+	// the warning follows.
+	const unpricedModelsQuery = useQuery({
+		...organizationUnpricedAIModels(organization?.id ?? "", period),
+		enabled: isSpendAvailable && organization !== undefined,
+	});
+
 	return (
 		<>
 			<title>{pageTitle("AI spend", "AI Settings")}</title>
@@ -94,7 +102,10 @@ const AISpendPage: React.FC<AISpendPageProps> = ({ now }) => {
 						[endDateSearchParam]: next.endDate,
 					})
 				}
+				overview={overviewQuery.data}
 				overviewError={overviewQuery.error}
+				unpricedModels={unpricedModelsQuery.data?.models}
+				isUnpricedModelsLoading={unpricedModelsQuery.isLoading}
 			/>
 		</>
 	);

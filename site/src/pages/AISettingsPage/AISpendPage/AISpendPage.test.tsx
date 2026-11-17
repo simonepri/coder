@@ -9,6 +9,7 @@ import {
 	MockOrganization,
 	MockOrganization2,
 	MockOrganizationAISpendOverview,
+	MockUnpricedAIModels,
 	MockUserMember,
 } from "#/testHelpers/entities";
 import { renderWithRouter } from "#/testHelpers/renderHelpers";
@@ -43,13 +44,15 @@ function renderAISpendPage(search = "") {
 		MockOrganization,
 		MockOrganization2,
 	]);
-	vi.spyOn(API, "checkAuthorization").mockResolvedValue({
-		[MockOrganization.id]: true,
-		[MockOrganization2.id]: true,
-	});
+	vi.spyOn(API, "checkAuthorization").mockImplementation(async ({ checks }) =>
+		Object.fromEntries(Object.keys(checks).map((key) => [key, true])),
+	);
 	const overviewSpy = vi
 		.spyOn(API.experimental, "getOrganizationAISpendOverview")
 		.mockResolvedValue(MockOrganizationAISpendOverview);
+	const unpricedModelsSpy = vi
+		.spyOn(API.experimental, "getOrganizationUnpricedAIModels")
+		.mockResolvedValue(MockUnpricedAIModels);
 	const router = createMemoryRouter(
 		[{ path, element: <AISpendPage now={now} /> }],
 		{ initialEntries: [`${path}?${search}`] },
@@ -57,7 +60,7 @@ function renderAISpendPage(search = "") {
 	renderWithRouter(router);
 	const searchParam = (key: string) =>
 		new URLSearchParams(router.state.location.search).get(key);
-	return { overviewSpy, searchParam };
+	return { overviewSpy, unpricedModelsSpy, searchParam };
 }
 
 it("requests the last 7 days as UTC days when the URL has no dates", async () => {
@@ -117,7 +120,18 @@ it("requests the selected organization's spend", async () => {
 });
 
 it("requests no spend for an organization the viewer cannot see", async () => {
-	const { overviewSpy } = renderAISpendPage("org=missing");
+	const { overviewSpy, unpricedModelsSpy } = renderAISpendPage("org=missing");
 	await screen.findByRole("combobox", { name: "Organization" });
 	expect(overviewSpy).not.toHaveBeenCalled();
+	expect(unpricedModelsSpy).not.toHaveBeenCalled();
+});
+
+it("requests the unpriced models for the same days as the overview", async () => {
+	const { unpricedModelsSpy } = renderAISpendPage();
+	await waitFor(() =>
+		expect(unpricedModelsSpy).toHaveBeenCalledWith(MockOrganization.id, {
+			period_start: "2026-03-06T00:00:00.000Z",
+			period_end: "2026-03-13T00:00:00.000Z",
+		}),
+	);
 });
