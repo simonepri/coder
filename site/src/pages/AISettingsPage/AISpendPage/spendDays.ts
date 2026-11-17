@@ -55,6 +55,21 @@ export const toSpendPeriod = (days: SpendDays): AISpendPeriodWindow => ({
 	period_end: dayjs.utc(days.endDate).add(1, "day").toISOString(),
 });
 
+/**
+ * Labels the days compactly, e.g. "Mar 6-12" or "Feb 27 - Mar 12".
+ */
+export const formatSpendDays = ({ startDate, endDate }: SpendDays): string => {
+	const start = dayjs.utc(startDate);
+	const end = dayjs.utc(endDate);
+	if (startDate === endDate) {
+		return start.format("MMM D");
+	}
+	if (start.isSame(end, "month")) {
+		return `${start.format("MMM D")}-${end.format("D")}`;
+	}
+	return `${start.format("MMM D")} - ${end.format("MMM D")}`;
+};
+
 /** Converts the days into the picker's local, end-exclusive boundaries. */
 export const toPickerValue = (days: SpendDays): DateRangeValue => ({
 	startDate: dayjs(days.startDate).toDate(),
