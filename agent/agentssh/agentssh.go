@@ -142,6 +142,9 @@ type Server struct {
 	sessionCountsMu sync.Mutex
 	sessionCounts   map[string]int64
 
+	// Connections with a client keep-alive loop, kept off mu like above.
+	clientAliveConns sync.Map
+
 	Execer       agentexec.Execer
 	logger       slog.Logger
 	srv          *ssh.Server
@@ -561,6 +564,11 @@ func (s *Server) sessionHandler(session ssh.Session) {
 		return
 	}
 	defer s.trackSession(session, false)
+
+	interval, countMax, env := extractClientAlive(env)
+	if interval > 0 {
+		s.closeOnMissedClientAlive(ctx, logger, interval, countMax)
+	}
 
 	reportSession := true
 
