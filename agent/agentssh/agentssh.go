@@ -142,7 +142,7 @@ type Server struct {
 	sessionCountsMu sync.Mutex
 	sessionCounts   map[string]int64
 
-	// Connections with a client keep-alive loop, kept off mu like above.
+	// One client keep-alive loop per connection.
 	clientAliveConns sync.Map
 
 	Execer       agentexec.Execer
